@@ -94,7 +94,5 @@ def test_not_found_delete_user(client):
 
 
 def test_not_found_read_user_by_id(client):
-    response = client.get(
-        '/users/2'
-    )
+    response = client.get('/users/2')
     assert response.json() == {'detail': 'User not found'}
