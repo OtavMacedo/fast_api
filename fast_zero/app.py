@@ -48,22 +48,26 @@ def create_user(user: UserSchema, session: Session = Depends(get_session)):
 
 @app.get('/users/', status_code=HTTPStatus.OK, response_model=UserList)
 def read_users(limit: int = 10, session: Session = Depends(get_session)):
-    users = session.scalars(Select(User).limit(limit))
+    db_users = session.scalars(
+        Select(User).limit(limit)
+    )
 
-    return {'users': users}
+    return {'users': db_users}
 
 
 @app.get(
     '/users/{user_id}', status_code=HTTPStatus.OK, response_model=UserPublic
 )
 def read_user_by_id(user_id: int, session: Session = Depends(get_session)):
-    user = session.scalar(Select(User).where(User.id == user_id))
-    if not user:
+    db_user = session.scalar(
+        Select(User).where(User.id == user_id)
+    )
+    if not db_user:
         raise HTTPException(
             status_code=HTTPStatus.NOT_FOUND, detail='User not found'
         )
 
-    return user
+    return db_user
 
 
 @app.put('/users/{user_id}', response_model=UserPublic)
