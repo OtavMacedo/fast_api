@@ -76,7 +76,7 @@ def test_delete_user(client, user):
     assert response.json() == {'message': 'User deleted'}
 
 
-def test_not_found_delete_user(client):
+def test_not_found_delete_user(client, user):
     response = client.delete(
         '/users/2',
     )
@@ -88,7 +88,7 @@ def test_not_found_read_user_by_id(client):
     assert response.json() == {'detail': 'User not found'}
 
 
-def test_not_found_update_user(client):
+def test_not_found_update_user(client, user):
     response = client.put(
         '/users/2',
         json={
@@ -105,10 +105,7 @@ def test_create_user_username_alredy_exists(client, user):
     user_schema = UserSchema.model_validate(user).model_dump()
     user_schema['email'] = 'username@already.exist'
 
-    response = client.post(
-        '/users/',
-        json=user_schema
-    )
+    response = client.post('/users/', json=user_schema)
     assert response.status_code == HTTPStatus.BAD_REQUEST
     assert response.json() == {'detail': 'Username already exists'}
 
@@ -117,9 +114,18 @@ def test_create_user_email_alredy_exists(client, user):
     user_schema = UserSchema.model_validate(user).model_dump()
     user_schema['username'] = 'email already exists'
 
-    response = client.post(
-        '/users/',
-        json=user_schema
-    )
+    response = client.post('/users/', json=user_schema)
     assert response.status_code == HTTPStatus.BAD_REQUEST
     assert response.json() == {'detail': 'Email already exists'}
+
+
+def test_get_token(client, user):
+    response = client.post(
+        '/token',
+        data={'username': user.email, 'password': user.clean_password},
+    )
+    token = response.json()
+
+    assert response.status_code == HTTPStatus.OK
+    assert token['token_type'] == 'Bearer'
+    assert 'access_token' in token
