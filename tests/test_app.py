@@ -54,9 +54,10 @@ def test_read_user_by_id(client, user):
     }
 
 
-def test_update_user(client, user):
+def test_update_user(client, user, token):
     response = client.put(
-        '/users/1',
+        f'/users/{user.id}',
+        headers={'Authorization': f'Bearer {token}'},
         json={
             'username': 'otavio',
             'password': '123456',
@@ -67,18 +68,22 @@ def test_update_user(client, user):
     assert response.json() == {
         'username': 'otavio',
         'email': 'otavio@intelbras.com.br',
-        'id': 1,
+        'id': user.id,
     }
 
 
-def test_delete_user(client, user):
-    response = client.delete('/users/1')
+def test_delete_user(client, user, token):
+    response = client.delete(
+        f'/users/{user.id}',
+        headers={'Authorization': f'Bearer {token}'},
+    )
     assert response.json() == {'message': 'User deleted'}
 
 
-def test_not_found_delete_user(client, user):
+def test_not_found_delete_user(client, user, token):
     response = client.delete(
         '/users/2',
+        headers={'Authorization': f'Bearer {token}'},
     )
     assert response.json() == {'detail': 'User not found'}
 
@@ -88,9 +93,10 @@ def test_not_found_read_user_by_id(client):
     assert response.json() == {'detail': 'User not found'}
 
 
-def test_not_found_update_user(client, user):
+def test_not_found_update_user(client, user, token):
     response = client.put(
         '/users/2',
+        headers={'Authorization': f'Bearer {token}'},
         json={
             'username': 'jeffim',
             'password': '654321',
